@@ -4,6 +4,18 @@ from django.db import models
 NULLABLE = {'blank': True, 'null': True}
 
 
+class EmailMessage(models.Model):
+    message_title = models.CharField(max_length=250, verbose_name='Тема письма')
+    message_body = models.TextField(verbose_name='Тело письма')
+
+    def __str__(self):
+        return self.message_title
+
+    class Meta:
+        verbose_name = 'Сообщение для рассылки'
+        verbose_name_plural = 'Сообщения для рассылки'
+
+
 class Client(models.Model):
     email = models.CharField(max_length=250, verbose_name='email')
 
@@ -19,18 +31,6 @@ class Client(models.Model):
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
-
-
-class EmailMessage(models.Model):
-    message_title = models.CharField(max_length=250, verbose_name='Тема письма')
-    message_body = models.TextField(verbose_name='Тело письма')
-
-    def __str__(self):
-        return self.message_title
-
-    class Meta:
-        verbose_name = 'Сообщение для рассылки'
-        verbose_name_plural = 'Сообщения для рассылки'
 
 
 class MessageLog(models.Model):
@@ -67,9 +67,9 @@ class MailingPeriod(models.Model):
 
 
 class MailingStatus(models.Model):
-    is_created = models.BooleanField(default=False, verbose_name='Рассылка создана')
-    is_started = models.BooleanField(default=False, verbose_name='Рассылка запущена')
-    is_complete = models.BooleanField(default=False, verbose_name='Рассылка завершена')
+    is_created = models.BooleanField(default=True, verbose_name='Рассылка создана', **NULLABLE)
+    is_started = models.BooleanField(default=False, verbose_name='Рассылка запущена', **NULLABLE)
+    is_complete = models.BooleanField(default=False, verbose_name='Рассылка завершена', **NULLABLE)
 
     def __str__(self):
         if self.is_created:
@@ -87,13 +87,30 @@ class MailingStatus(models.Model):
 
 
 class MailingSettings(models.Model):
-    mailing_datetime = models.DateTimeField(verbose_name='Время рассылки')
+    mailing_date = models.DateField(verbose_name='Дата начала рассылки')
+    mailing_time = models.TimeField(verbose_name='Время для рассылки')
     mailing_period = models.ForeignKey(MailingPeriod, on_delete=models.CASCADE, verbose_name='Периодичность рассылки')
     mailing_status = models.ForeignKey(MailingStatus, on_delete=models.CASCADE, verbose_name='Статус рассылки')
 
     def __str__(self):
-        return f'Время рассылки: {self.mailing_datetime}, периодичность: {self.mailing_period}, статус: {self.mailing_status}'
+        return f'Время рассылки: {self.mailing_time}, периодичность: {self.mailing_period}, статус: {self.mailing_status}'
 
     class Meta:
         verbose_name = 'Настройки рассылки'
         verbose_name_plural = 'Настройки рассылок'
+
+
+class Mailer(models.Model):
+    email_message = models.ForeignKey(EmailMessage, on_delete=models.CASCADE, verbose_name='Письмо для рассылки')
+    client = models.ManyToManyField(Client, verbose_name='Клиент')
+    mailing_settings = models.ForeignKey(MailingSettings, on_delete=models.CASCADE, verbose_name='Настройки рассылки')
+    message_log = models.ForeignKey(MessageLog, on_delete=models.CASCADE, verbose_name='Логи рассылки', **NULLABLE)
+
+    def __str__(self):
+        client_emails = ', '.join([client.email for client in self.clients.all()])
+        return f'Клиенты: {client_emails}, Письмо: {self.email_message.message_title}, ' \
+               f'Периодичность: {self.mailing_settings.mailing_period}'
+
+    class Meta:
+        verbose_name = 'Рассылка'
+        verbose_name_plural = 'Рассылки'
