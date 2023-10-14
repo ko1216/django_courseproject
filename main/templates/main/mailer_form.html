@@ -1,0 +1,32 @@
+{% extends 'main/base.html' %}
+{% load bootstrap4 %}
+
+{% block content %}
+<a href="{% url 'main:client_form' %}" class="btn btn-outline-primary">Создать клиента</a>
+<div class="row-12">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    {% if object %}
+                    Редактирование
+                    {% else %}
+                    Создание
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% bootstrap_form form %}
+                </div>
+                <button type="submit" class="btn btn-success">
+                    {% if object %}
+                    Сохранить
+                    {% else %}
+                    Создать настройки рассылки
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

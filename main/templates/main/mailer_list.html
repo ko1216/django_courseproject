@@ -1,0 +1,33 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<a href="{% url 'main:mailer_form' %}" class="btn btn-outline-primary">Создать рассылку</a>
+
+<div class="container">
+    <div class="row text-center">
+        {% for mailer in mailer_list %}
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-title">
+                    {{mailer.email_message.message_title}}
+                </div>
+                <div class="card-body">
+                        Клиенты:
+                        {% for client in mailer.client.all %}
+                        {{ client.email }},
+                        {% endfor %}
+                    </p>
+                    <p class="card-text mb-auto">{{ mailer.mailing_settings.mailing_status }}</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mailer_update' mailer.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mailer_delete' mailer.pk %}">Удалить</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

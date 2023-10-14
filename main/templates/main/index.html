@@ -1,0 +1,31 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+
+<h1 class="display-4">Email рассылка</h1>
+<p class="lead">Прогревный прогрев клиентов</p>
+
+<a href="#" class="btn btn-outline-primary">Создать прогрев</a>
+
+<div class="container">
+    <div class="row text-center">
+        {% for client in clients %}
+        <div class="col-4">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h5 class="my-0 font-weight-normal">{{ client.first_name|title }}</h5>
+                    <h5 class="my-0 font-weight-normal">{{ client.last_name|title }}</h5>
+                </div>
+                <div class="card-body">
+                    {% for email in client.email_message %}
+                    <ul class="list-unstyled mt-3 mb-4 text-center m-3">
+                        <li>{{ email }}</li>
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
