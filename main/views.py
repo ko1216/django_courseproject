@@ -1,6 +1,4 @@
-from django.forms import inlineformset_factory, formset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 
