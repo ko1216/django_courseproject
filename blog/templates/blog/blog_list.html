@@ -1,0 +1,14 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    {% if user.is_staff %}
+    <a href="{% url 'blog:blog_create' %}" class="btn btn-primary">Создать пост</a>
+    {% endif %}
+    <div class="row text-center">
+        {% for blog in blogs %}
+        {% include 'blog/includes/inc_blog.html' %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
