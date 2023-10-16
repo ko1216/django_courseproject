@@ -20,6 +20,7 @@ db_password: str = os.getenv('PSQL_PASSWORD')
 gmail_login: str = os.getenv('GMAIL_LOGIN')
 gmail_pass: str = os.getenv('GMAIL_PASSWORD')
 secret_key: str = os.getenv('DJANGO_SK')
+r_location: str = os.getenv('REDIS_LOCATION')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -153,3 +154,12 @@ EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = gmail_login
 EMAIL_HOST_PASSWORD = gmail_pass
+
+# Настройки CELERY
+CELERY_BROKER_URL = r_location
+CELERY_RESULT_BACKEND = r_location
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
