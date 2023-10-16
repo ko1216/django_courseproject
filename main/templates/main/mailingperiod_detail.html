@@ -1,0 +1,21 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <h6 class="card-text mb-auto">{{ period }}</h6>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mail_period_update' period.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mail_period_delete' period.pk %}">Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

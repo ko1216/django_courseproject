@@ -5,8 +5,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 
-from main.forms import MailerCreateForm, MailingSettingsForm, ClientCreateForm
-from main.models import MailingSettings, Client, EmailMessage, Mailer
+from main.forms import MailerCreateForm, MailingSettingsForm, ClientCreateForm, MailingPeriodForm
+from main.models import MailingSettings, Client, EmailMessage, Mailer, MailingPeriod, MailingStatus
 from main.tasks import send_mail
 
 
@@ -160,6 +160,11 @@ class MailerCreateView(LoginRequiredMixin, CreateView):
     form_class = MailerCreateForm
     success_url = reverse_lazy('main:mailer_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.owner = self.request.user  # присваивание владельца для записи
 
@@ -222,13 +227,14 @@ class MailingSettingsCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        form.instance.mailing_status.is_created = True
+        mailing_status, created = MailingStatus.objects.get_or_create(is_created=True)
+        form.instance.mailing_status = mailing_status
         return super().form_valid(form)
 
 
 class MailingSettingsUpdateView(LoginRequiredMixin, UpdateView):
     model = MailingSettings
-    fields = '__all__'
+    form_class = MailingSettingsForm
 
     def get_success_url(self):
         return reverse('main:mail_settings_detail', args=[self.kwargs.get('pk')])
@@ -270,3 +276,59 @@ def complete_mailer(request, mailer_id):
         mailer.mailing_settings.mailing_status.save()
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'mailer/'))
+
+
+class MailingPeriodListView(LoginRequiredMixin, ListView):
+    model = MailingPeriod
+    context_object_name = 'period_list'
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return MailingPeriod.objects.all()
+        else:
+            return MailingPeriod.objects.filter(owner=self.request.user)
+
+
+class MailingPeriodDetailView(LoginRequiredMixin, DetailView):
+    model = MailingPeriod
+    context_object_name = 'period'
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = super().get_queryset(*args, **kwargs)
+        queryset = queryset.filter(pk=self.kwargs['pk'])
+        return queryset
+
+    def get_object(self):
+        obj = super().get_object()
+        if obj.owner != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied('Вы не являетесь владельцем данной записи')
+        return obj
+
+
+class MailingPeriodCreateView(LoginRequiredMixin, CreateView):
+    model = MailingPeriod
+    success_url = reverse_lazy('main:mail_period_list')
+    form_class = MailingPeriodForm
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+
+class MailingPeriodUpdateView(LoginRequiredMixin, UpdateView):
+    model = MailingPeriod
+    form_class = MailingPeriodForm
+
+    def get_success_url(self):
+        return reverse('main:mail_period_detail', args=[self.kwargs.get('pk')])
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied('Вы не являетесь владельцем данной записи')
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MailingPeriodDeleteView(LoginRequiredMixin, DeleteView):
+    model = MailingPeriod
+    success_url = reverse_lazy('main:mail_period_list')
