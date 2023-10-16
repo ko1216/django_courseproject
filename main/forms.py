@@ -1,8 +1,17 @@
 from django import forms
+from django.core.validators import EmailValidator
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 from django.forms import SelectDateWidget, TimeInput
 
 from .models import Mailer, Client, MailingSettings, MailingStatus
+
+
+class ClientCreateForm(forms.ModelForm):
+    email = forms.EmailField(validators=[EmailValidator(message="Введите корректный email адрес")])
+
+    class Meta:
+        model = Client
+        fields = ['email', 'first_name', 'last_name', 'middle_name', 'comment']
 
 
 class MailerCreateForm(forms.ModelForm):
@@ -10,6 +19,15 @@ class MailerCreateForm(forms.ModelForm):
         queryset=Client.objects.all(),
         widget=Select2MultipleWidget,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Получите все настройки, которые уже связаны с существующими рассылками
+        existing_settings = MailingSettings.objects.filter(mailer__isnull=False)
+
+        # Исключите существующие настройки из выпадающего списка
+        self.fields['mailing_settings'].queryset = MailingSettings.objects.exclude(id__in=existing_settings)
 
     class Meta:
         model = Mailer
