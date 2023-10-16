@@ -1,9 +1,11 @@
+from django.conf.global_settings import EMAIL_HOST_USER
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 
-from main.forms import MailerCreateForm, MailingSettingsForm
+from main.forms import MailerCreateForm, MailingSettingsForm, ClientCreateForm
 from main.models import MailingSettings, Client, EmailMessage, Mailer
+from main.tasks import send_mail
 
 
 class IndexListView(ListView):
@@ -19,7 +21,7 @@ class ClientListView(ListView):
 
 class ClientDetailView(DetailView):
     model = Client
-    context_object_name = 'detail'
+    context_object_name = 'client'
 
     def get_queryset(self, *args, **kwargs):
         queryset = super().get_queryset(*args, **kwargs)
@@ -29,8 +31,8 @@ class ClientDetailView(DetailView):
 
 class ClientCreateView(CreateView):
     model = Client
+    form_class = ClientCreateForm
     success_url = reverse_lazy('main:client_list')
-    fields = '__all__'
 
 
 class ClientUpdateView(UpdateView):
@@ -103,13 +105,13 @@ class MailerCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.save()
-        self.object.client.set(form.cleaned_data['clients'])
+        self.object.clients.set(form.cleaned_data['clients'])
         return HttpResponseRedirect(self.get_success_url())
 
 
 class MailerUpdateView(UpdateView):
     model = Mailer
-    fields = ('client', 'email_message', 'mailing_settings')
+    fields = ('clients', 'email_message', 'mailing_settings')
 
     def get_success_url(self):
         return reverse('main:mailer_detail', args=[self.kwargs.get('pk')])
@@ -153,3 +155,29 @@ class MailingSettingsDeleteView(DeleteView):
     model = MailingSettings
     success_url = reverse_lazy('main:mail_settings_list')
 
+
+def start_mailer(request, mailer_id):
+    mailer = Mailer.objects.get(pk=mailer_id)
+    if not mailer.mailing_settings.mailing_status.is_started:
+        mailer.mailing_settings.mailing_status.is_started = True
+        mailer.mailing_settings.mailing_status.is_created = False
+        mailer.mailing_settings.mailing_status.save()
+
+        clients_email = [client.email for client in mailer.clients.all()]
+        from_email = EMAIL_HOST_USER
+
+        send_mail(mailer, clients_email, mailer.email_message.message_title, mailer.email_message.message_body,
+                  mailer.mailing_settings.mailing_date, mailer.mailing_settings.mailing_time,
+                  mailer.mailing_settings.mailing_period, from_email)
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'mailer/'))
+
+
+def complete_mailer(request, mailer_id):
+    mailer = Mailer.objects.get(pk=mailer_id)
+    if mailer.mailing_settings.mailing_status.is_started:
+        mailer.mailing_settings.mailing_status.is_started = False
+        mailer.mailing_settings.mailing_status.is_complete = True
+        mailer.mailing_settings.mailing_status.save()
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'mailer/'))
