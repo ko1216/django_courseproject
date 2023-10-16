@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<a href="{% url 'main:mailer_form' %}" class="btn btn-outline-primary">Создать рассылку</a>
+
+<div class="container">
+    <div class="row text-center">
+        {% for mailer in mailer_list %}
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-title">
+                    {{mailer.email_message.message_title}}
+                </div>
+                <div class="card-body">
+                    Клиенты:
+                    {{ mailer }}
+                    <p class="card-text mb-auto">{{ mailer.mailing_settings.mailing_status }}</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mailer_update' mailer.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mailer_delete' mailer.pk %}">Удалить</a>
+                    {% if not mailer.mailing_settings.mailing_status.is_started %}
+                    <form method="post" action="{% url 'main:start_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success">Запустить</button>
+                    </form>
+                    {% endif %}
+                    {% if mailer.mailing_settings.mailing_status.is_started %}
+                    <form method="post" action="{% url 'main:complete_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Остановить рассылку</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <h6 class="card-text mb-auto">{{ mailer }}</h6>
+                    <p>{{ mailer.mailing_settings }}</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mailer_update' mail.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mailer_delete' mail.pk %}">Удалить</a>
+                    {% if not mailer.mailing_settings.is_started %}
+                    <form method="post" action="{% url 'main:start_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Запустить</button>
+                    </form>
+                    {% endif %}
+                    {% if mailer.mailing_settings.is_started %}
+                    <form method="post" action="{% url 'main:complete_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Остановить рассылку</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

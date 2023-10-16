@@ -1,0 +1,28 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<a href="{% url 'main:mail_settings_form' %}" class="btn btn-outline-primary">Создать настройки</a>
+
+<div class="container">
+    <div class="row text-center">
+        {% for settings in settings_list %}
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <a class="btn btn-link" href="{% url 'main:mail_settings_detail' settings.pk %}">
+                        {{ mailer }}
+                    </a>
+                    <p class="card-text mb-auto">{{ settings }}</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mail_settings_update' settings.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mail_settings_delete' settings.pk %}">Удалить</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

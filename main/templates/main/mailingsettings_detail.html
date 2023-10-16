@@ -1,0 +1,24 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <h6 class="card-text mb-auto">{{ settings }}</h6>
+                    <p>Периодичность: {{ settings.mailing_period }}</p>
+                    <p>Время рассылки: {{ settings.mailing_time }}</p>
+                    <p>Дата создания: {{ settings.mailing_date }}</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mail_settings_update' settings.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mail_settings_delete' settings.pk %}">Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
