@@ -1,0 +1,24 @@
+{% load media_path %}
+<div class="col-md-6">
+    <div class="card mb-4 box-shadow">
+        <div class="wrapper exmpl">
+            <img src="{{product.products_image|mymedia }}"/>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-link" href="{% url 'blog:blog_detail' blog.pk %}">
+                {{ blog.title }} ({{ blog.slug }})
+            </a>
+            {% if blog.last_update == blog.created_at %}
+            <div class="mb-1 text-body-secondary">Опубликовано: {{ blog.last_update }}</div>
+            {% else %}
+            <div class="mb-1 text-body-secondary">Обновлено: {{ blog.last_update }}</div>
+            {% endif %}
+            <p class="card-text mb-auto">{{ blog.text }}</p>
+            <p class="card-text mb-auto float-right">Кол-во просмотров: {{ blog.views_count }}</p>
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-link" href="{% url 'blog:blog_update' blog.pk %}">Изменить</a>
+            <a class="btn btn-outline-danger float-right" href="{% url 'blog:blog_delete' blog.pk %}">Удалить</a>
+        </div>
+    </div>
+</div>

@@ -1,9 +1,10 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 from django.forms import SelectDateWidget, TimeInput
 
-from .models import Mailer, Client, MailingSettings, MailingStatus
+from .models import Mailer, Client, MailingSettings, MailingPeriod, EmailMessage
 
 
 class ClientCreateForm(forms.ModelForm):
@@ -16,18 +17,24 @@ class ClientCreateForm(forms.ModelForm):
 
 class MailerCreateForm(forms.ModelForm):
     clients = forms.ModelMultipleChoiceField(
-        queryset=Client.objects.all(),
+        queryset=None,
         widget=Select2MultipleWidget,
     )
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Извлекаем пользователя из kwargs
         super().__init__(*args, **kwargs)
 
-        # Получите все настройки, которые уже связаны с существующими рассылками
-        existing_settings = MailingSettings.objects.filter(mailer__isnull=False)
+        if user is not None:
+            self.fields['clients'].queryset = Client.objects.filter(owner=user)
 
-        # Исключите существующие настройки из выпадающего списка
-        self.fields['mailing_settings'].queryset = MailingSettings.objects.exclude(id__in=existing_settings)
+        # Получаем все настройки, которые еще не связаны с существующими рассылками
+        existing_settings = MailingSettings.objects.filter(mailer__isnull=True)
+
+        # Исключаем существующие настройки из выпадающего списка, а также определяем, что владелец авторизованный юзер
+        self.fields['mailing_settings'].queryset = MailingSettings.objects.filter(id__in=existing_settings, owner=user)
+
+        self.fields['email_message'].queryset = EmailMessage.objects.filter(owner=user)
 
     class Meta:
         model = Mailer
@@ -37,7 +44,7 @@ class MailerCreateForm(forms.ModelForm):
 class MailingSettingsForm(forms.ModelForm):
     class Meta:
         model = MailingSettings
-        fields = ['mailing_time', 'mailing_date', 'mailing_period', 'mailing_status']
+        fields = ['mailing_time', 'mailing_date', 'mailing_period']
 
     widgets = {
         'mailing_date': SelectDateWidget(),
@@ -45,8 +52,19 @@ class MailingSettingsForm(forms.ModelForm):
         'mailing_period': Select2Widget,
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Установите mailing_status по умолчанию
-        mailing_status, created = MailingStatus.objects.get_or_create(is_created=True)
-        self.fields['mailing_status'].initial = mailing_status
+
+class MailingPeriodForm(forms.ModelForm):
+    class Meta:
+        model = MailingPeriod
+        fields = ['daily', 'weekly', 'monthly']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        daily = cleaned_data.get('daily')
+        weekly = cleaned_data.get('weekly')
+        monthly = cleaned_data.get('monthly')
+
+        # Проверка на то, что только одно из полей daily, weekly, monthly установлено как True
+        if sum([daily, weekly, monthly]) != 1:
+            raise ValidationError("Выберите ровно один вариант для периодичности")
+

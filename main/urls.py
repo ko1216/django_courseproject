@@ -1,17 +1,19 @@
 from django.urls import path
+from django.views.decorators.cache import cache_page
 
 from main.apps import MainConfig
 from main.views import IndexListView, ClientListView, ClientCreateView, ClientDetailView, ClientDeleteView, \
     ClientUpdateView, EmailMessageListView, EmailMessageCreateView, EmailMessageDetailView, EmailMessageDeleteView, \
     EmailMessageUpdateView, MailerListView, MailerCreateView, MailerDetailView, MailerDeleteView, MailerUpdateView, \
     MailingSettingsListView, MailingSettingsCreateView, MailingSettingsDetailView, MailingSettingsDeleteView, \
-    MailingSettingsUpdateView, start_mailer, complete_mailer
+    MailingSettingsUpdateView, start_mailer, complete_mailer, MailingPeriodListView, MailingPeriodCreateView, \
+    MailingPeriodDetailView, MailingPeriodDeleteView, MailingPeriodUpdateView
 
 app_name = MainConfig.name
 
 
 urlpatterns = [
-    path('', IndexListView.as_view(), name='index'),
+    path('', cache_page(60)(IndexListView.as_view()), name='index'),
     path('clients/', ClientListView.as_view(), name='client_list'),
     path('create_client/', ClientCreateView.as_view(), name='client_form'),
     path('client/<int:pk>/', ClientDetailView.as_view(), name='client_detail'),
@@ -34,4 +36,9 @@ urlpatterns = [
     path('mail_settings/update/<int:pk>', MailingSettingsUpdateView.as_view(), name='mail_settings_update'),
     path('start_mailer/<int:mailer_id>', start_mailer, name='start_mailer'),
     path('complete_mailer/<int:mailer_id>', complete_mailer, name='complete_mailer'),
+    path('mail_periods/', MailingPeriodListView.as_view(), name='mail_period_list'),
+    path('create_mail_period/', MailingPeriodCreateView.as_view(), name='mail_period_form'),
+    path('mail_period/<int:pk>/', MailingPeriodDetailView.as_view(), name='mail_period_detail'),
+    path('mail_period/delete/<int:pk>', MailingPeriodDeleteView.as_view(), name='mail_period_delete'),
+    path('mail_period/update/<int:pk>', MailingPeriodUpdateView.as_view(), name='mail_period_update'),
 ]

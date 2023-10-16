@@ -1,0 +1,27 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<a href="{% url 'main:mail_period_form' %}" class="btn btn-outline-primary">Создать настройки</a>
+
+<div class="container">
+    <div class="row text-center">
+        {% for period in period_list %}
+        <div class="col-md-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-body">
+                    <a class="btn btn-link" href="{% url 'main:mail_period_detail' period.pk %}">
+                        {{ period }}
+                    </a>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-outline-success float-right"
+                       href="{% url 'main:mail_period_update' period.pk %}">Изменить</a>
+                    <a class="btn btn-outline-danger float-right"
+                       href="{% url 'main:mail_period_delete' period.pk %}">Удалить</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
