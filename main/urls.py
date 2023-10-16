@@ -5,7 +5,7 @@ from main.views import IndexListView, ClientListView, ClientCreateView, ClientDe
     ClientUpdateView, EmailMessageListView, EmailMessageCreateView, EmailMessageDetailView, EmailMessageDeleteView, \
     EmailMessageUpdateView, MailerListView, MailerCreateView, MailerDetailView, MailerDeleteView, MailerUpdateView, \
     MailingSettingsListView, MailingSettingsCreateView, MailingSettingsDetailView, MailingSettingsDeleteView, \
-    MailingSettingsUpdateView
+    MailingSettingsUpdateView, start_mailer, complete_mailer
 
 app_name = MainConfig.name
 
@@ -14,7 +14,7 @@ urlpatterns = [
     path('', IndexListView.as_view(), name='index'),
     path('clients/', ClientListView.as_view(), name='client_list'),
     path('create_client/', ClientCreateView.as_view(), name='client_form'),
-    path('<int:pk>/', ClientDetailView.as_view(), name='client_detail'),
+    path('client/<int:pk>/', ClientDetailView.as_view(), name='client_detail'),
     path('delete/<int:pk>', ClientDeleteView.as_view(), name='client_delete'),
     path('update/<int:pk>', ClientUpdateView.as_view(), name='client_update'),
     path('mails/', EmailMessageListView.as_view(), name='emailmessage_list'),
@@ -32,4 +32,6 @@ urlpatterns = [
     path('mail_settings/<int:pk>/', MailingSettingsDetailView.as_view(), name='mail_settings_detail'),
     path('mail_settings/delete/<int:pk>', MailingSettingsDeleteView.as_view(), name='mail_settings_delete'),
     path('mail_settings/update/<int:pk>', MailingSettingsUpdateView.as_view(), name='mail_settings_update'),
+    path('start_mailer/<int:mailer_id>', start_mailer, name='start_mailer'),
+    path('complete_mailer/<int:mailer_id>', complete_mailer, name='complete_mailer'),
 ]
