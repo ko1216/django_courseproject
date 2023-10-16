@@ -1,3 +1,5 @@
+from random import random
+
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
@@ -5,8 +7,10 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, DetailView, DeleteView, UpdateView
 
+from blog.models import Blog
 from main.forms import MailerCreateForm, MailingSettingsForm, ClientCreateForm, MailingPeriodForm
 from main.models import MailingSettings, Client, EmailMessage, Mailer, MailingPeriod, MailingStatus
+from main.services import random_choice
 from main.tasks import send_mail
 
 
@@ -14,6 +18,14 @@ class IndexListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = 'main/index.html'
     context_object_name = 'clients'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mailers_count'] = len(Mailer.objects.all())
+        context['started_mailers_count'] = len(MailingStatus.objects.filter(is_started=True))
+        context['clients'] = len(Client.objects.all())
+        context['blogs'] = random_choice(Blog.objects.all())
+        return context
 
 
 class ClientListView(LoginRequiredMixin, ListView):
