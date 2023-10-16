@@ -17,7 +17,7 @@ class EmailMessage(models.Model):
 
 
 class Client(models.Model):
-    email = models.CharField(max_length=250, verbose_name='email')
+    email = models.CharField(max_length=250, verbose_name='email', unique=True)
 
     first_name = models.CharField(max_length=250, verbose_name='Имя')
     last_name = models.CharField(max_length=250, verbose_name='Фамилия')
@@ -31,19 +31,6 @@ class Client(models.Model):
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
-
-
-class MessageLog(models.Model):
-    last_attempt = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время последней попытки')
-    status = models.BooleanField(default=False, verbose_name='Статус отправки')
-    server_response = models.TextField(verbose_name='Ответ почтового сервера', **NULLABLE)
-
-    def __str__(self):
-        return f'время попытки: {self.last_attempt}, статус {self.status}'
-
-    class Meta:
-        verbose_name = 'Лог'
-        verbose_name_plural = 'Логи'
 
 
 class MailingPeriod(models.Model):
@@ -102,15 +89,30 @@ class MailingSettings(models.Model):
 
 class Mailer(models.Model):
     email_message = models.ForeignKey(EmailMessage, on_delete=models.CASCADE, verbose_name='Письмо для рассылки')
-    client = models.ManyToManyField(Client, verbose_name='Клиент')
+    clients = models.ManyToManyField(Client, verbose_name='Клиенты')
     mailing_settings = models.ForeignKey(MailingSettings, on_delete=models.CASCADE, verbose_name='Настройки рассылки')
-    message_log = models.ForeignKey(MessageLog, on_delete=models.CASCADE, verbose_name='Логи рассылки', **NULLABLE)
+    # message_log = models.ForeignKey(MessageLog, on_delete=models.CASCADE, verbose_name='Логи рассылки', **NULLABLE)
 
     def __str__(self):
         client_emails = ', '.join([client.email for client in self.clients.all()])
         return f'Клиенты: {client_emails}, Письмо: {self.email_message.message_title}, ' \
-               f'Периодичность: {self.mailing_settings.mailing_period}'
+               f'{self.mailing_settings.mailing_period}, ' \
+               f'Дата и время начала рассылки: {self.mailing_settings.mailing_date} {self.mailing_settings.mailing_time}'
 
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
+
+
+class MessageLog(models.Model):
+    last_attempt = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время последней попытки')
+    status = models.BooleanField(default=False, verbose_name='Статус отправки')
+    server_response = models.TextField(verbose_name='Ответ почтового сервера', **NULLABLE)
+    mailer = models.ForeignKey(Mailer, on_delete=models.CASCADE, verbose_name='Рассылка', **NULLABLE)
+
+    def __str__(self):
+        return f'время попытки: {self.last_attempt}, статус {self.status}'
+
+    class Meta:
+        verbose_name = 'Лог'
+        verbose_name_plural = 'Логи'
