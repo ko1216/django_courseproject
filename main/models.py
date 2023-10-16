@@ -43,6 +43,8 @@ class MailingPeriod(models.Model):
     weekly = models.BooleanField(default=False, verbose_name='Еженедельно')
     monthly = models.BooleanField(default=False, verbose_name='Ежемесячно')
 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
+
     def __str__(self):
         if self.daily:
             return 'Периодичность рассылки: ежедневно'
