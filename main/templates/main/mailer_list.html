@@ -12,11 +12,8 @@
                     {{mailer.email_message.message_title}}
                 </div>
                 <div class="card-body">
-                        Клиенты:
-                        {% for client in mailer.client.all %}
-                        {{ client.email }},
-                        {% endfor %}
-                    </p>
+                    Клиенты:
+                    {{ mailer }}
                     <p class="card-text mb-auto">{{ mailer.mailing_settings.mailing_status }}</p>
                 </div>
                 <div class="card-footer">
@@ -24,6 +21,18 @@
                        href="{% url 'main:mailer_update' mailer.pk %}">Изменить</a>
                     <a class="btn btn-outline-danger float-right"
                        href="{% url 'main:mailer_delete' mailer.pk %}">Удалить</a>
+                    {% if not mailer.mailing_settings.mailing_status.is_started %}
+                    <form method="post" action="{% url 'main:start_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success">Запустить</button>
+                    </form>
+                    {% endif %}
+                    {% if mailer.mailing_settings.mailing_status.is_started %}
+                    <form method="post" action="{% url 'main:complete_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Остановить рассылку</button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

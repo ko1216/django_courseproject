@@ -14,6 +14,18 @@
                        href="{% url 'main:mailer_update' mail.pk %}">Изменить</a>
                     <a class="btn btn-outline-danger float-right"
                        href="{% url 'main:mailer_delete' mail.pk %}">Удалить</a>
+                    {% if not mailer.mailing_settings.is_started %}
+                    <form method="post" action="{% url 'main:start_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Запустить</button>
+                    </form>
+                    {% endif %}
+                    {% if mailer.mailing_settings.is_started %}
+                    <form method="post" action="{% url 'main:complete_mailer' mailer.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Остановить рассылку</button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
