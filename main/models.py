@@ -1,5 +1,6 @@
 from django.db import models
 
+from users.models import User
 
 NULLABLE = {'blank': True, 'null': True}
 
@@ -7,6 +8,8 @@ NULLABLE = {'blank': True, 'null': True}
 class EmailMessage(models.Model):
     message_title = models.CharField(max_length=250, verbose_name='Тема письма')
     message_body = models.TextField(verbose_name='Тело письма')
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
 
     def __str__(self):
         return self.message_title
@@ -24,6 +27,8 @@ class Client(models.Model):
     middle_name = models.CharField(max_length=250, verbose_name='Отчество', **NULLABLE)
 
     comment = models.TextField(verbose_name='Комментарий', **NULLABLE)
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
 
     def __str__(self):
         return f'Клиент: {self.last_name} {self.first_name}, email: {self.email}'
@@ -79,6 +84,8 @@ class MailingSettings(models.Model):
     mailing_period = models.ForeignKey(MailingPeriod, on_delete=models.CASCADE, verbose_name='Периодичность рассылки')
     mailing_status = models.ForeignKey(MailingStatus, on_delete=models.CASCADE, verbose_name='Статус рассылки')
 
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
+
     def __str__(self):
         return f'Время рассылки: {self.mailing_time}, периодичность: {self.mailing_period}, статус: {self.mailing_status}'
 
@@ -91,7 +98,8 @@ class Mailer(models.Model):
     email_message = models.ForeignKey(EmailMessage, on_delete=models.CASCADE, verbose_name='Письмо для рассылки')
     clients = models.ManyToManyField(Client, verbose_name='Клиенты')
     mailing_settings = models.ForeignKey(MailingSettings, on_delete=models.CASCADE, verbose_name='Настройки рассылки')
-    # message_log = models.ForeignKey(MessageLog, on_delete=models.CASCADE, verbose_name='Логи рассылки', **NULLABLE)
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Владелец', **NULLABLE)
 
     def __str__(self):
         client_emails = ', '.join([client.email for client in self.clients.all()])

@@ -37,7 +37,7 @@ class MailerCreateForm(forms.ModelForm):
 class MailingSettingsForm(forms.ModelForm):
     class Meta:
         model = MailingSettings
-        fields = ['mailing_time', 'mailing_date', 'mailing_period', 'mailing_status']
+        fields = ['mailing_time', 'mailing_date', 'mailing_period']
 
     widgets = {
         'mailing_date': SelectDateWidget(),
@@ -45,8 +45,8 @@ class MailingSettingsForm(forms.ModelForm):
         'mailing_period': Select2Widget,
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Установите mailing_status по умолчанию
-        mailing_status, created = MailingStatus.objects.get_or_create(is_created=True)
-        self.fields['mailing_status'].initial = mailing_status
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # Установите mailing_status по умолчанию
+    #     mailing_status, created = MailingStatus.objects.get_or_create(is_created=True)
+    #     self.fields['mailing_status'].initial = mailing_status
