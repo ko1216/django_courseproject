@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate %}Подтвердите вашу почту на сайте {{ site_name }}.{% endblocktranslate %}
+
+{% block reset_link %}
+http://{{ domain }}{{ token_link }}
+{% endblock %}
+
+{% translate "Если вы не регистрировались на нашем сайте, проигнорируйте это сообщение." %}
+
+{% endautoescape %}

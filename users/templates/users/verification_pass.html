@@ -1,0 +1,10 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Подтверждение почты</h1>
+            <p>Ваша почта успешно подтверждена. Теперь вы можете войти на сайт.</p>
+            <a href="{% url 'users:login' %}">Войти</a>
+        </div>
+
+{% endblock %}
