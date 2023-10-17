@@ -21,6 +21,10 @@ gmail_login: str = os.getenv('GMAIL_LOGIN')
 gmail_pass: str = os.getenv('GMAIL_PASSWORD')
 secret_key: str = os.getenv('DJANGO_SK')
 r_location: str = os.getenv('REDIS_LOCATION')
+db_username: str = os.getenv('DB_USERNAME')
+db_name: str = os.getenv('DB_NAME')
+smtp_host: str = os.getenv('SMTP_HOST')
+smtp_port: int = int(os.getenv('SMTP_PORT'))
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -95,8 +99,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django_courseproject',
-        'USER': 'postgres',
+        'NAME': db_name,
+        'USER': db_username,
         'PASSWORD': db_password,
     }
 }
@@ -156,7 +160,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = smtp_host
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = gmail_login
