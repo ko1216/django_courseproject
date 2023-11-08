@@ -51,7 +51,7 @@ def send_mail(mailer,
                     delay_seconds = delta_after_time + (604800 - delta_after_time)
                 elif period.monthly:
                     delay_seconds = delta_after_time + (
-                                16934400 - delta_after_time)  # расчет сделан для 28 дней в месяце
+                                2419200 - delta_after_time)  # расчет сделан для 28 дней в месяце
             else:
                 delay_seconds = (task_datetime - now_time).total_seconds()
 

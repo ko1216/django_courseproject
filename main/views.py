@@ -1,5 +1,3 @@
-from random import random
-
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
